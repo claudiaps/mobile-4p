@@ -1,7 +1,29 @@
+import { getWeatherIcon } from "@/constants/WeatherIcons";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import axios from "axios";
 import { useCallback, useEffect, useState } from "react";
-import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
+import {
+  ActivityIndicator,
+  FlatList,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+
+type Condition = {
+  text: string;
+  code: number;
+};
+
+type ForcastDay = {
+  date: string;
+  day: {
+    maxtemp_c: number;
+    mintemp_c: number;
+    condition: Condition;
+  };
+};
 
 type Weather = {
   location: {
@@ -14,11 +36,22 @@ type Weather = {
     temp_c: number;
     is_day: number;
     uv: string;
-    condition: {
-      text: string;
-      code: number;
-    };
+    condition: Condition;
   };
+  forecast: {
+    forecastday: ForcastDay[];
+  };
+};
+
+type WeatherIcon =
+  | "weather-sunny"
+  | "weather-partly-cloudy"
+  | "cloud-outline"
+  | "weather-cloudy-alert"
+  | "weather-sunny-off";
+
+const ForcastDayItem = ({ forcastday }: { forcastday: ForcastDay }) => {
+  return <Text>{forcastday?.date}</Text>;
 };
 
 const index = () => {
@@ -56,7 +89,19 @@ const index = () => {
             Índice UV: {weather?.current?.uv}
           </Text>
         </View>
+        <MaterialCommunityIcons
+          name={
+            getWeatherIcon(weather?.current?.condition?.code) as WeatherIcon
+          }
+          size={56}
+          color="white"
+        />
       </View>
+      <FlatList
+        data={weather?.forecast?.forecastday}
+        keyExtractor={(item) => item.date}
+        renderItem={({ item }) => <ForcastDayItem forcastday={item} />}
+      />
     </SafeAreaView>
   );
 };
